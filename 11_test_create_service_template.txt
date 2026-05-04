@@ -1,0 +1,13 @@
+private static IPaymentService CreateService()
+{
+    var gateways = new IPaymentGateway[]
+    {
+        new FastPayGateway(),
+        new SecurePayGateway(),
+        new TrendyolWalletGateway()
+    };
+
+    var gatewayFactory = new PaymentGatewayFactory(gateways);
+
+    return new PaymentService(gatewayFactory);
+}

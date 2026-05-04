@@ -1,0 +1,24 @@
+using ProjectName.Api.Exceptions;
+using ProjectName.Api.Models;
+
+namespace ProjectName.Api.Gateways;
+
+public class PaymentGatewayFactory : IPaymentGatewayFactory
+{
+    private readonly IReadOnlyDictionary<PaymentGatewayType, IPaymentGateway> _gateways;
+
+    public PaymentGatewayFactory(IEnumerable<IPaymentGateway> gateways)
+    {
+        _gateways = gateways.ToDictionary(gateway => gateway.GatewayType);
+    }
+
+    public IPaymentGateway GetByType(PaymentGatewayType gatewayType)
+    {
+        if (_gateways.TryGetValue(gatewayType, out var gateway))
+        {
+            return gateway;
+        }
+
+        throw new BusinessException("Unsupported payment gateway");
+    }
+}

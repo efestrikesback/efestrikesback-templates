@@ -1,0 +1,16 @@
+using ProjectName.Api.Models;
+
+namespace ProjectName.Api.Gateways;
+
+public interface IPaymentGatewayFactory
+{
+    IPaymentGateway GetByType(PaymentGatewayType gatewayType);
+}
+
+
+namespace ProjectName.Api.ShippingProviders;
+
+public interface IShippingProviderFactory
+{
+    IReadOnlyCollection<IShippingProvider> GetAll();
+}
