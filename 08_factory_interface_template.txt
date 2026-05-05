@@ -7,10 +7,56 @@ public interface IPaymentGatewayFactory
     IPaymentGateway GetByType(PaymentGatewayType gatewayType);
 }
 
-
-namespace ProjectName.Api.ShippingProviders;
-
-public interface IShippingProviderFactory
+public class PaymentGatewayFactory : IPaymentGatewayFactory
 {
-    IReadOnlyCollection<IShippingProvider> GetAll();
+    private readonly IReadOnlyDictionary<PaymentGatewayType, IPaymentGateway> _paymentGateways;
+
+    public PaymentGatewayFactory(IEnumerable<IPaymentGateway> paymentGateways)
+    {
+        _paymentGateways = paymentGateways.ToDictionary(gateway => gateway.PaymentGatewayType);
+    }
+
+    public IPaymentGateway GetType(PaymentGatewayType paymentGatewayType)
+    {
+        if (_paymentGateways.TryGetValue(paymentGatewayType, out var gateway))
+        {
+            return gateway;
+        }
+
+        throw new BusinessException("Unsupported gateway");
+    }
+}
+
+//DICTIONARY
+
+public interface IDiscountProviderFactory
+{
+    IReadOnlyCollection<IDiscountProvider> GetByTypes(IEnumerable<CampaignType> campaignTypes);
+}
+
+public class DiscountProviderFactory : IDiscountProviderFactory
+{
+    private readonly IReadOnlyDictionary<CampaignType, IDiscountProvider> _providers;
+
+    public DiscountProviderFactory(IEnumerable<IDiscountProvider> providers)
+    {
+        _providers = providers.ToDictionary(provider => provider.CampaignType);
+    }
+
+    public IReadOnlyCollection<IDiscountProvider> GetByTypes(IEnumerable<CampaignType> campaignTypes)
+    {
+        var selectedProviders = new List<IDiscountProvider>();
+
+        foreach (var campaignType in campaignTypes.Distinct())
+        {
+            if (!_providers.TryGetValue(campaignType, out var provider))
+            {
+                throw new BusinessException("Unsupported campaign type");
+            }
+
+            selectedProviders.Add(provider);
+        }
+
+        return selectedProviders;
+    }
 }
